@@ -1,120 +1,27 @@
-import random, copy, time
+from constants import *
+from Actions import *
+from gameLogic import *
+
 '''
 import psyco ; psyco.jit() 
 from psyco.classes import *
 '''
+global counter
 counter = 0
 
-building_items = ['rock', 'ore', 'wood', 'ruby', 'food']
-plants = ['wheat', 'vegetable']
-animals = ['dog', 'sheep', 'donkey', 'pig', 'cow']
-items = building_items + plants + animals
 
-inv = {'dwarves':[2,0], 'food':1, 'history' :[]}
 
+inv = {}
 for item in items: inv[item] = 0
+inv.update({'dwarves':[2,0], 'food':1, 'history' :[], 'forest':[[[]]*4]*3, 'cave':[[[]]*4]*3, 'tiles':[]})
+inv['cave'][0][0] = ['dwelling']
+inv['cave'][0][1] = ['cavern']
+inv['cave'][1][0] = ['food']
+inv['cave'][2][3] = ['food']*2
+inv['cave'][1][0] = ['food']
+inv['cave'][2][3] = ['pig']
+inv['cave'][0][1] = ['pig']
 
-class ActionSpace:
-    def __init__(self, name, accumulate=[[],[]], pickup=[]):
-        self.name = name
-        self.accumulate = accumulate
-        self.pickup = pickup
-        self.inUse = 0
-        
-        self.itemDic = {}
-        for item in items: self.itemDic[item] = 0
-        
-    def _update(self):
-        self.inUse = 0
-    
-        n = sum(self.itemDic.values())
-        if n > 6:
-            for key in self.itemDic.keys(): self.itemDic[key] = 0
-        elif n == 0:
-            for key in self.accumulate[0]: self.itemDic[key] += 1
-        else:
-            for key in self.accumulate[1]: self.itemDic[key] += 1
-    
-    def _use(self, inventory):
-        inventory['dwarves'][0] -= 1
-        inventory['dwarves'][1] += 1
-        self.inUse = 1
-        for key in self.itemDic.keys():
-            inventory[key] += self.itemDic[key]
-            self.itemDic[key] = 0
-        for item in self.pickup:
-            inventory[item] += 1 
-        inventory['history'].append(self.name)
-
-Actions = [ActionSpace(name, acc, pickup) for (name, acc, pickup) in 
-            [('Excavation',[['rock']]*2,[]), 
-             ('Logging', [['wood']*3,['wood']], []),
-             ('Wood gathering', [['wood']]*2, []), 
-             ('Ore mining', [['ore']*2,['ore']], []), 
-             ('Sustenance', [['food']]*2, ['wheat']),
-             ('Ruby mining', [['ruby']]*2, []), 
-             ('Housework', [[],[]], ['dog']), 
-             ('Slash-and-burn', [[],[]], []), 
-             ('Blacksmithing', [[],[]], []),
-             ('Sheep Farming', [['sheep']]*2, []),
-             ('Ore mine construction', [[],[]], []), 
-             ('Wish for children', [[],[]], []),             
-             ('Donkey farming', [['donkey']]*2, []), 
-             ('Ruby mine construction', [[],[]], []), 
-             ('Ore delivery', [['ore','rock']]*2, []), 
-             ('Family life', [[],[]], []), 
-             ('Ore trading', [[],[]], []), 
-             ('Adventure', [[],[]], []), 
-             ('Ruby delivery', [['ruby']*2,['ruby']], [])]]
-
-
-
-def update(actions, inventory):
-    for action in actions:
-        action._update()	      
-
-def score(inventory):
-    res = 0
-    for animal in animals:
-        if inventory[animal] == 0:
-            res -= 2
-        else:
-            res += inventory[animal]
-    res += inventory['vegetable']
-    res += (inventory['wheat']+1)/2
-    res += sum(inventory['dwarves'])
-    res += inventory['ruby']
-    
-    return res
-
-
-def maximizer(actions, turns, inventory):
-    global counter
-    
-    if turns == 0:
-        return inventory
-    if not inventory['dwarves'][0]:
-        inventory['dwarves'][0] = inventory['dwarves'][1]
-        inventory['dwarves'][1] = 0
-        return maximizer(actions, turns-1, inventory)
-    if not inventory['dwarves'][1]:
-        update(actions, inventory)
-    
-    counter += 1
-    #print turns, inventory
-    #raw_input()
-    
-    
-    results = []
-    for i in range(len(actions)):
-        if not actions[i].inUse:
-            newInv, newActions = copy.deepcopy(inventory), copy.deepcopy(actions)
-            
-            newActions[i]._use(newInv)
-            results.append(maximizer(newActions, turns, newInv))
-    
-    res = sorted(results, key=lambda x: score(x))
-    return res[-1] 
     
 '''
 for i in range(3):
