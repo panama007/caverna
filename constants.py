@@ -1,4 +1,4 @@
-import random, copy, time
+import random, copy, time, os
 
 building_items = ['rock', 'ore', 'wood', 'ruby', 'food']
 plants = ['wheat', 'vegetable']

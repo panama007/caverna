@@ -24,16 +24,23 @@ def score(inventory):
     return res
 
 
-def maximizer(actions, turns, inventory):
+def maximizer(actions, turns, inventory, highScore):
     #global counter
     
     if turns == 0:
+        s = score(inventory)
+        if s > highScore['score']:
+            os.system('cls')
+            print inventory
+            print s
+            highScore['score'] = s
+            highScore['inv'] = inventory
         return inventory
     if not inventory['dwarves'][0]:
         inventory['dwarves'][0] = inventory['dwarves'][1]
         inventory['dwarves'][1] = 0
         update(actions, inventory)
-        return maximizer(actions, turns-1, inventory)
+        return maximizer(actions, turns-1, inventory, highScore)
     #if not inventory['dwarves'][1]:
         
     
@@ -43,12 +50,13 @@ def maximizer(actions, turns, inventory):
     
     
     results = []
+    random.shuffle(actions)
     for i in range(len(actions)):
         if not actions[i].inUse:
             newInv, newActions = copy.deepcopy(inventory), copy.deepcopy(actions)
             
             newActions[i].use(newInv)
-            results.append(maximizer(newActions, turns, newInv))
+            results.append(maximizer(newActions, turns, newInv, highScore))
     
     res = sorted(results, key=lambda x: score(x))
     return res[-1] 
