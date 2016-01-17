@@ -1,8 +1,10 @@
-import random, copy, time, os
+import random, copy, time, os, numpy as np
 
-building_items = ['rock', 'ore', 'wood', 'ruby', 'food']
+totalRounds = 11
+
+buildingItems = ['rock', 'ore', 'wood', 'ruby', 'food']
 plants = ['wheat', 'vegetable']
 animals = ['dog', 'sheep', 'donkey', 'pig', 'cow']
-items = building_items + plants + animals
+items = buildingItems + plants + animals
 
 

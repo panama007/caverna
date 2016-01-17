@@ -23,28 +23,30 @@ class ActionSpace:
         else:
             for key in self.accumulate[1]: self.itemDic[key] += 1
     
-    def _use(self, inventory):
-        inventory['dwarves'][0] -= 1
-        inventory['dwarves'][1] += 1
+    def _use(self, gamestate):
+        gamestate['inventory']['dwarves']['home'] -= 1
+        gamestate['inventory']['dwarves']['working'] += 1
         self.inUse = 1
         for key in self.itemDic.keys():
-            inventory[key] += self.itemDic[key]
+            gamestate['inventory'][key] += self.itemDic[key]
             self.itemDic[key] = 0
         for item in self.pickup:
-            inventory[item] += 1 
-        inventory['history'].append(self.name)
+            gamestate['inventory'][item] += 1 
+        gamestate['inventory']['history'][-1].append(self.name)
 
-    def use(self, inventory):
-        self._use(inventory)
+    def use(self, gamestate):
+        self._use(gamestate)
+        return [gamestate]
 
 class TilePlacementAction(ActionSpace):
     def __init__(self, name, accumulate=[[],[]], pickup=[], tile=[]):
         self.tile = tile
         ActionSpace.__init__(self, name, accumulate=[[],[]], pickup=[])
-    def use(self, inventory):
-        self._use(inventory)
-        self.placeTile(inventory)
-    def placeTile(self, inventory):
+    def use(self, gamestate):
+        self._use(gamestate)
+        self.placeTile(gamestate)
+        return [gamestate]
+    def placeTile(self, gamestate):
         pass
     
 NormalActions = [ActionSpace(name, acc, pickup) for (name, acc, pickup) in 
@@ -54,7 +56,7 @@ NormalActions = [ActionSpace(name, acc, pickup) for (name, acc, pickup) in
              ('Ruby mining', [['ruby']]*2, []), 
              ('Blacksmithing', [[],[]], []),
              ('Sheep Farming', [['sheep']]*2, []), 
-             ('Wish for children', [[],[]], []),             
+             ('Wish for children', [[],[]], []),
              ('Donkey farming', [['donkey']]*2, []), 
              ('Ore delivery', [['ore','rock']]*2, []), 
              ('Family life', [[],[]], []), 
