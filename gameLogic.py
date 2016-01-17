@@ -1,5 +1,10 @@
 from constants import *
 
+def canNewDwarf(gamestate):
+    return 0
+
+def expedition(gamestate, n):
+    return [copy.deepcopy(gamestate)]
 
 def update(gamestate):
     gamestate['inventory']['dwarves']['home'] = gamestate['inventory']['dwarves']['working']
@@ -20,6 +25,7 @@ def score(gamestate):
     res += (gamestate['inventory']['wheat']+1)/2
     res += sum(gamestate['inventory']['dwarves'].values())
     res += gamestate['inventory']['ruby']
+    res += gamestate['inventory']['gold']
     
     return res
 
