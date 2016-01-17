@@ -1,14 +1,22 @@
 from constants import *
 
 def canNewDwarf(gamestate):
-    return 0
+    return 1
+    
+def strength(dwarf):
+    if dwarf == 'unarmed':
+        return 0
+    else: return int(dwarf)
 
 def expedition(gamestate, n):
     return [copy.deepcopy(gamestate)]
 
 def update(gamestate):
-    gamestate['inventory']['dwarves']['home'] = gamestate['inventory']['dwarves']['working']
-    gamestate['inventory']['dwarves']['working'] = 0
+    l = list(gamestate['inventory']['dwarves']['working'])
+    l = ['unarmed' if elem == 'baby' else elem for elem in l]
+    l.sort(key=strength)
+    gamestate['inventory']['dwarves']['home'] = l
+    gamestate['inventory']['dwarves']['working'] = []
     for action in gamestate['actions']:
         action._update()	      
     gamestate['turn'] += 1
@@ -23,7 +31,8 @@ def score(gamestate):
             res += gamestate['inventory'][animal]
     res += gamestate['inventory']['vegetable']
     res += (gamestate['inventory']['wheat']+1)/2
-    res += sum(gamestate['inventory']['dwarves'].values())
+    print gamestate['inventory']['dwarves']
+    res += sum([len(l) for l in gamestate['inventory']['dwarves'].values()])
     res += gamestate['inventory']['ruby']
     res += gamestate['inventory']['gold']
     

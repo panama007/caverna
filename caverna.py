@@ -13,7 +13,7 @@ highScore = {'score':-1000}
 
 inv = {}
 for item in items: inv[item] = 0
-inv.update({'dwarves':{'home':2,'working':0}, 'food':2, 'history' :[[]], 'forest':[[[]]*4]*3, 'cave':[[[]]*4]*3, 'tiles':[]})
+inv.update({'dwarves':{'home':['unarmed']*2,'working':[]}, 'food':2, 'history' :[[]], 'forest':[[[]]*4]*3, 'cave':[[[]]*4]*3, 'tiles':[]})
 inv['cave'][0][0] = ['dwelling']
 inv['cave'][0][1] = ['cavern']
 inv['cave'][1][0] = ['food']

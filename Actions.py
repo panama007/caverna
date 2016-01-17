@@ -25,8 +25,8 @@ class ActionSpace:
             for key in self.accumulate[1]: self.itemDic[key] += 1
         
     def _use(self, gamestate):
-        gamestate['inventory']['dwarves']['home'] -= 1
-        gamestate['inventory']['dwarves']['working'] += 1
+        d = gamestate['inventory']['dwarves']['home'].pop(0)
+        gamestate['inventory']['dwarves']['working'].append(d)
         self.inUse = 1
         for key in self.itemDic.keys():
             gamestate['inventory'][key] += self.itemDic[key]
@@ -77,7 +77,7 @@ class Blacksmithing(ActionSpace):
         for i in range(gamestate['inventory']['ore']):
             newGamestate = copy.deepcopy(gamestate)
             newGamestate['inventory']['ore'] -= i+1
-            # TODO upgrade the dwarf to i+1
+            gamestate['inventory']['dwarves']['working'][-1] = str(i+1)
             states.append(newGamestate)
         return states
         
@@ -109,11 +109,13 @@ class WishForChildren(ActionSpace):
     def placeDwelling(self, gamestate):
         return [copy.deepcopy(gamestate)]
     def use(self, gamestate):
+       # print "hi"
         self._use(gamestate)
         states = []
         if canNewDwarf(gamestate):
             newGamestate = copy.deepcopy(gamestate)
-            #add baby dwarf
+            newGamestate['inventory']['dwarves']['working'].append('baby')
+            #print newGamestate['inventory']['dwarves']['working']
             states.append(newGamestate)
         states += self.placeDwelling(gamestate)
         return states
