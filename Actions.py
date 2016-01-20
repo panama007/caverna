@@ -8,44 +8,31 @@ class ActionSpace:
         self.name = name
         self.accumulate = accumulate
         self.pickup = pickup
-        self.inUse = 0
-        
-        self.itemDic = {}
-        for item in items: self.itemDic[item] = 0
-        
-    def _update(self):
-        self.inUse = 0
-    
-        n = sum(self.itemDic.values())
-        if n > 6:
-            for key in self.itemDic.keys(): self.itemDic[key] = 0
-        elif n == 0:
-            for key in self.accumulate[0]: self.itemDic[key] += 1
-        else:
-            for key in self.accumulate[1]: self.itemDic[key] += 1
-        
+
     def _use(self, gamestate):
-        d = gamestate['inventory']['dwarves']['home'].pop(0)
-        gamestate['inventory']['dwarves']['working'].append(d)
-        self.inUse = 1
-        for key in self.itemDic.keys():
-            gamestate['inventory'][key] += self.itemDic[key]
-            self.itemDic[key] = 0
+        d = gamestate['dwarves']['home'].pop(0)
+        gamestate['dwarves']['working'].append(d)
+        gamestate['actions'][self.name][1] = 1
+        for item in gamestate['actions'][self.name][2]:
+            gamestate['inventory'][item] += 1
+        gamestate['actions'][self.name][2] = []
         for item in self.pickup:
             gamestate['inventory'][item] += 1 
-        gamestate['inventory']['history'][-1].append(self.name)
+        gamestate['history'][-1].append(self.name)
 
     def use(self, gamestate):
-        self._use(gamestate)
-        return [gamestate]
+        newGamestate = copy.deepcopy(gamestate)
+        self._use(newGamestate)
+        return [newGamestate]
 
 # TODO make sure all Actions are making new copies of gamestates before acting on them
 class Logging(ActionSpace):
     def __init__(self):
         ActionSpace.__init__(self, 'Logging', [['wood']*3,['wood']])
     def use(self, gamestate):
-        self._use(gamestate)
-        return expedition(gamestate,1)
+        newGamestate = copy.deepcopy(gamestate)
+        self._use(newGamestate)
+        return expedition(newGamestate,1)
         
 class WoodGathering(ActionSpace):
     def __init__(self):
@@ -55,30 +42,32 @@ class OreMining(ActionSpace):
     def __init__(self):
         ActionSpace.__init__(self, 'Ore mining', [['ore']*2,['ore']])
     def use(self, gamestate):
-        self._use(gamestate)
-        #add 2 ore to inv for each mine
-        gamestate['inventory']['ore'] += 2 * sum(row.count('ore mine') for row in gamestate['inventory']['cave'])
-        return [gamestate]
+        newGamestate = copy.deepcopy(gamestate)
+        self._use(newGamestate)
+        newGamestate['inventory']['ore'] += 2 * sum(row.count('ore mine') for row in newGamestate['board']['cave'])
+        return [newGamestate]
 
 class RubyMining(ActionSpace):
     def __init__(self):
         ActionSpace.__init__(self, 'Ruby mining', [['ruby']]*2)
     def use(self, gamestate):
-        self._use(gamestate)
-        if sum(row.count('ruby mine') for row in gamestate['inventory']['cave']): gamestate['inventory']['ruby'] += 1 
-        return [gamestate]
+        newGamestate = copy.deepcopy(gamestate)
+        self._use(newGamestate)
+        if sum(row.count('ruby mine') for row in newGamestate['board']['cave']): newGamestate['inventory']['ruby'] += 1 
+        return [newGamestate]
         
 class Blacksmithing(ActionSpace):
     def __init__(self):
         ActionSpace.__init__(self, 'Blacksmithing')
     def use(self, gamestate):
-        self._use(gamestate)
+        newGamestate = copy.deepcopy(gamestate)
+        self._use(newGamestate)
         states = []
-        for i in range(gamestate['inventory']['ore']):
-            newGamestate = copy.deepcopy(gamestate)
-            newGamestate['inventory']['ore'] -= i+1
-            gamestate['inventory']['dwarves']['working'][-1] = str(i+1)
-            states.append(newGamestate)
+        for i in range(newGamestate['inventory']['ore']):
+            otherNewGamestate = copy.deepcopy(newGamestate)
+            otherNewGamestate['inventory']['ore'] -= i+1
+            otherNewGamestate['dwarves']['working'][-1] = str(i+1)
+            states.append(otherNewGamestate)
         return states
         
 class SheepFarming(ActionSpace):
@@ -109,15 +98,15 @@ class WishForChildren(ActionSpace):
     def placeDwelling(self, gamestate):
         return [copy.deepcopy(gamestate)]
     def use(self, gamestate):
-       # print "hi"
-        self._use(gamestate)
+        newGamestate = copy.deepcopy(gamestate)
+        self._use(newGamestate)
         states = []
-        if canNewDwarf(gamestate):
-            newGamestate = copy.deepcopy(gamestate)
-            newGamestate['inventory']['dwarves']['working'].append('baby')
+        if canNewDwarf(newGamestate):
+            otherNewGamestate = copy.deepcopy(newGamestate)
+            otherNewGamestate['dwarves']['working'].append('baby')
             #print newGamestate['inventory']['dwarves']['working']
-            states.append(newGamestate)
-        states += self.placeDwelling(gamestate)
+            states.append(otherNewGamestate)
+        states += self.placeDwelling(newGamestate)
         return states
 
 class DonkeyFarming(ActionSpace):
@@ -146,10 +135,10 @@ class OreDelivery(ActionSpace):
     def __init__(self):
         ActionSpace.__init__(self, 'Ore delivery', [['ore','rock']]*2)
     def use(self, gamestate):
-        self._use(gamestate)
-        #add 2 ore to inv for each mine
-        gamestate['inventory']['ore'] += 2 * sum(row.count('ore mine') for row in gamestate['inventory']['cave'])
-        return [gamestate]
+        newGamestate = copy.deepcopy(gamestate)
+        self._use(newGamestate)
+        newGamestate['inventory']['ore'] += 2 * sum(row.count('ore mine') for row in newGamestate['board']['cave'])
+        return [newGamestate]
 
 class FamilyLife(ActionSpace):
     def __init__(self):
@@ -159,14 +148,15 @@ class OreTrading(ActionSpace):
     def __init__(self):
         ActionSpace.__init__(self, 'Ore trading')
     def use(self, gamestate):
-        self._use(gamestate)
+        newGamestate = copy.deepcopy(gamestate)
+        self._use(newGamestate)
         states = []
-        for i in range(max(gamestate['inventory']['ore']/2, 3)):
-            newGamestate = copy.deepcopy(gamestate)
-            newGamestate['inventory']['ore'] -= 2*(i+1)
-            newGamestate['inventory']['gold'] += 2*(i+1)
-            newGamestate['inventory']['food'] += (i+1)
-            states.append(newGamestate)
+        for i in range(max(newGamestate['inventory']['ore']/2, 3)):
+            otherNewGamestate = copy.deepcopy(newGamestate)
+            otherNewGamestate['inventory']['ore'] -= 2*(i+1)
+            otherNewGamestate['inventory']['gold'] += 2*(i+1)
+            otherNewGamestate['inventory']['food'] += (i+1)
+            states.append(otherNewGamestate)
         return states
         
 class Adventure(ActionSpace):
@@ -177,9 +167,10 @@ class RubyDelivery(ActionSpace):
     def __init__(self):
         ActionSpace.__init__(self, 'Ruby delivery', [['ruby']*2,['ruby']])
     def use(self, gamestate):
-        self._use(gamestate)
-        if sum(row.count('ruby mine') for row in gamestate['inventory']['cave'])/2: gamestate['inventory']['ruby'] += 1 
-        return [gamestate]
+        newGamestate = copy.deepcopy(gamestate)
+        self._use(newGamestate)
+        if sum(row.count('ruby mine') for row in newGamestate['board']['cave'])/2: newGamestate['inventory']['ruby'] += 1 
+        return [newGamestate]
 
 class Excavation(ActionSpace):
     def __init__(self):
@@ -187,8 +178,9 @@ class Excavation(ActionSpace):
     def placeCaveTwin(self, gamestate):
         return [copy.deepcopy(gamestate)]
     def use(self, gamestate):
-        self._use(gamestate)
-        return self.placeCaveTwin(gamestate)
+        newGamestate = copy.deepcopy(gamestate)
+        self._use(newGamestate)
+        return self.placeCaveTwin(newGamestate)
         
 class Sustenance(ActionSpace):
     def __init__(self):
@@ -196,8 +188,9 @@ class Sustenance(ActionSpace):
     def placeForestTwin(self, gamestate):
         return [copy.deepcopy(gamestate)]
     def use(self, gamestate):
-        self._use(gamestate)
-        return self.placeForestTwin(gamestate)
+        newGamestate = copy.deepcopy(gamestate)
+        self._use(newGamestate)
+        return self.placeForestTwin(newGamestate)
         
 class Housework(ActionSpace):
     def __init__(self):
@@ -205,8 +198,9 @@ class Housework(ActionSpace):
     def placeFurnishing(self, gamestate):
         return [copy.deepcopy(gamestate)]
     def use(self, gamestate):
-        self._use(gamestate)
-        return self.placeFurnishing(gamestate)
+        newGamestate = copy.deepcopy(gamestate)
+        self._use(newGamestate)
+        return self.placeFurnishing(newGamestate)
         
 class SlashAndBurn(ActionSpace):
     def __init__(self):
@@ -214,8 +208,9 @@ class SlashAndBurn(ActionSpace):
     def plantCrops(self, gamestate):
         return [copy.deepcopy(gamestate)]
     def use(self, gamestate):
-        self._use(gamestate)
-        return self.plantCrops(gamestate)
+        newGamestate = copy.deepcopy(gamestate)
+        self._use(newGamestate)
+        return self.plantCrops(newGamestate)
         
 class OreMineConstruction(ActionSpace):
     def __init__(self):
@@ -223,8 +218,9 @@ class OreMineConstruction(ActionSpace):
     def placeOreMine(self, gamestate):
         return [copy.deepcopy(gamestate)]
     def use(self, gamestate):
-        self._use(gamestate)
-        return self.placeOreMine(gamestate)        
+        newGamestate = copy.deepcopy(gamestate)
+        self._use(newGamestate)
+        return self.placeOreMine(newGamestate)        
         
 class RubyMineConstruction(ActionSpace):
     def __init__(self):
@@ -232,8 +228,9 @@ class RubyMineConstruction(ActionSpace):
     def placeRubyMine(self, gamestate):
         return [copy.deepcopy(gamestate)]
     def use(self, gamestate):
-        self._use(gamestate)
-        return self.placeRubyMine(gamestate)        
+        newGamestate = copy.deepcopy(gamestate)
+        self._use(newGamestate)
+        return self.placeRubyMine(newGamestate)        
 
 Actions = [Logging(), WoodGathering(), OreMining(), RubyMining(), Blacksmithing(), SheepFarming(),
            WishForChildren(), DonkeyFarming(), OreDelivery(), FamilyLife(), OreTrading(), Adventure(),

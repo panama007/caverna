@@ -10,17 +10,23 @@ from psyco.classes import *
 #counter = 0
 highScore = {'score':-1000}
 
+dwarves = {'home':['unarmed']*2,'working':[]}
+
+history = [[]]
+
+board = {'forest':[[[]]*4]*3, 'cave':[[[]]*4]*3, 'tiles':[]}
+board['cave'][0][0] = ['dwelling']
+board['cave'][0][1] = ['cavern']
+board['cave'][1][0] = ['food']
+board['cave'][2][3] = ['food']*2
+board['forest'][1][0] = ['food']
+board['forest'][2][3] = ['pig']
+board['forest'][0][1] = ['pig']
 
 inv = {}
 for item in items: inv[item] = 0
-inv.update({'dwarves':{'home':['unarmed']*2,'working':[]}, 'food':2, 'history' :[[]], 'forest':[[[]]*4]*3, 'cave':[[[]]*4]*3, 'tiles':[]})
-inv['cave'][0][0] = ['dwelling']
-inv['cave'][0][1] = ['cavern']
-inv['cave'][1][0] = ['food']
-inv['cave'][2][3] = ['food']*2
-inv['forest'][1][0] = ['food']
-inv['forest'][2][3] = ['pig']
-inv['forest'][0][1] = ['pig']
+inv.update({'food':2, })
+
 
 def UCT(node, n):
     #print node['scores'], n
@@ -44,8 +50,7 @@ def explore(node, tree):
     node['fullyExplored'] = 1
     
 
-   
-gamestate = {'actions':Actions, 'inventory':inv,'turn':0}
+gamestate = {'actions':{a.name:[a,0,[]] for a in Actions}, 'inventory':inv, 'turn':0, 'dwarves':dwarves, 'board':board, 'history':history}
 root = {'gamestate':gamestate,'scores':[],'fullyExplored':0} 
 tree = [root]
 

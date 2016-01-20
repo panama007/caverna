@@ -7,4 +7,5 @@ plants = ['wheat', 'vegetable']
 animals = ['dog', 'sheep', 'donkey', 'pig', 'cow']
 items = buildingItems + plants + animals
 
-
+def cls():
+    os.system('cls' if os.name=='nt' else 'clear')
