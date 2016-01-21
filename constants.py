@@ -4,7 +4,8 @@ totalRounds = 11
 
 buildingItems = ['rock', 'ore', 'wood', 'ruby', 'food', 'gold']
 plants = ['wheat', 'vegetable']
-animals = ['dog', 'sheep', 'donkey', 'pig', 'cow']
+farmAnimals = ['sheep', 'donkey', 'pig', 'cow']]
+animals = ['dog'] + farmAnimals
 items = buildingItems + plants + animals
 
 def cls():

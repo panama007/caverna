@@ -42,6 +42,8 @@ def score(gamestate):
     res += sum([len(l) for l in gamestate['dwarves'].values()])
     res += gamestate['inventory']['ruby']
     res += gamestate['inventory']['gold']
+    for tile in gamestate['board']['tiles']:
+        res += tile.points(gamestate)
     
     return res
 
