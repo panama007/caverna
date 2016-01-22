@@ -13,6 +13,9 @@ class Tile:
         return self.pts
 
 
+class StarterDwelling(Tile):
+    def __init__(self):
+        Tile.__init__(self, 'Starter dwelling', 0, [], dwarves=2, animals={'num':2,'type':farmAnimals})
         
 class Dwelling(Tile):
     def __init__(self):
@@ -91,7 +94,11 @@ class GuestRoom(Tile):
         Tile.__init__(self, 'Guest room', 0, ['wood']+['rock'])
     # TODO    
 
-Dwellings = [Dwelling(), SimpleDwelling1(), SimpleDwelling2(), MixedDwelling(), CoupleDwelling()]
 
-Tiles = Dwellings + []
+
+Dwellings = [Dwelling(), SimpleDwelling1(), SimpleDwelling2(), MixedDwelling(), CoupleDwelling()]
+Others = [Carpenter(), StoneCarver(), Blacksmith(), Miner(), Builder(), Trader(), CuddleRoom(), BreakfastRoom(),
+          StubbleRoom(), WorkRoom(), GuestRoom()]
+
+Tiles = Dwellings + Others
       

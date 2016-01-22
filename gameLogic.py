@@ -2,8 +2,13 @@ from constants import *
 
 def canNewDwarf(gamestate):
     n = sum(len(d) for d in gamestate['dwarves'].values())
-    if n < 5:
-        return 1
+    m = 0
+    has6 = 0
+    if 
+    for tile in gamestate['board']['tiles']:
+        
+        if n < 5:
+        
     
 def strength(dwarf):
     if dwarf == 'unarmed':

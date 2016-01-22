@@ -1,6 +1,7 @@
 from constants import *
 from Actions import *
 from gameLogic import *
+from Tiles import *
 
 '''
 import psyco ; psyco.jit() 
@@ -14,8 +15,8 @@ dwarves = {'home':['unarmed']*2,'working':[]}
 
 history = [[]]
 
-board = {'forest':[[[]]*4]*3, 'cave':[[[]]*4]*3, 'tiles':[]}
-board['cave'][0][0] = ['dwelling']
+board = {'forest':[[[]]*4]*3, 'cave':[[[]]*4]*3, 'tiles':[StarterDwelling()]}
+board['cave'][0][0] = ['starter dwelling']
 board['cave'][0][1] = ['cavern']
 board['cave'][1][0] = ['food']
 board['cave'][2][3] = ['food']*2
